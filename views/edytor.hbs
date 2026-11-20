@@ -1,0 +1,268 @@
+<div class="M2">
+    <div class="Left">
+        <div class="Fonts">
+            <button id="F-" onclick="Font_function('minus')">font -</button>
+            <button id="Kp" onclick="Color_Change()">kolory</button>
+            <button id="Fp" onclick="Font_function('plus')">font +</button>
+        </div>
+        <button id="Settings" onclick="Font_save()">zapisz ustawienia</button>
+        <button id="Name" onclick="openDialogREN()">zmiana nazwy</button>
+        <a id="Show" href="/Show">Podgląd pliku</a>
+    </div>
+    <div class="Space">
+        <div class="PATH">
+            <p id="NM">/{{name}}</p>
+        </div>
+        <div id="Edytor">
+            <div id="Lines">
+                <div class="CNT">1</div>
+            </div>
+            <div id="Divide">ㅤ</div>
+            <div id="TextArea">
+                <textarea autofocus name="Area" id="Area" rows="{{rows}}" wrap="off"
+                    spellcheck="false">{{content}}</textarea>
+            </div>
+        </div>
+        <div id="CLC">
+            <div id="Closer">ㅤ</div>
+        </div>
+
+
+        <button id="SAVE" onclick="Fetch()">Zapisz zmiany</button>
+    </div>
+</div>
+<script>
+    function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+
+    let area = document.getElementById("Area")
+    let Lines = document.getElementById("Lines")
+    let Divide = document.getElementById("Divide")
+    let Edytor = document.getElementById("Edytor")
+    let Path = document.querySelector(".PATH")
+    let Path_txt = document.querySelector(".PATH p")
+    let Closer = document.getElementById("Closer")
+    let CLC = document.getElementById("CLC")
+    let Font = 1
+    let line_size = (23 * Font)
+    let Color = "light"
+    let available_colors = ["light", "dark", "green", "purple"]
+
+    Lines.style.height = area.offsetHeight + "px"
+    Divide.style.height = area.offsetHeight + "px"
+
+    const Color_Change = () => {
+        let Index = available_colors.indexOf(Color) + 1
+        console.log(Index)
+        if (Index > 3) {
+            Index = 0
+            Color = available_colors[Index]
+            Color_Check(Color)
+        }
+        else {
+            Color = available_colors[Index]
+            Color_Check(Color)
+        }
+    }
+
+    const Color_Check = (color) => {
+        const Color_Set = (color1, color2, color3, color4, color5) => {
+            Lines.style.backgroundColor = color1
+
+            Lines.style.color = color2
+            Path_txt.style.color = color2
+            area.style.caretColor = color2
+
+            Divide.style.backgroundColor = color3
+            Closer.style.backgroundColor = color3
+            Path.style.backgroundColor = color3
+
+            area.style.backgroundColor = color4
+            area.style.color = color5
+        }
+
+
+        if (color == "light") {
+            Color_Set("azure", "lightskyblue", "steelblue", "white", "black")
+        }
+        else if (color == "dark") {
+            Color_Set("slategray", "#93A8BD", "#545F6B", "#343B42", "white")
+        }
+        else if (color == "green") {
+            Color_Set("lightcyan", "turquoise", "darkcyan", "lightseagreen", "lightcyan")
+        }
+        else if (color == "purple") {
+            Color_Set("darkorchid", "magenta", "darkslateblue", "slateblue", "#af88ff")
+        }
+    }
+
+    const Font_function = (text) => {
+        if (text == "minus") {
+            if (Font > 0.5) {
+                Font -= 0.5
+            }
+            else {
+                alert("Minimalna wielkość czcionki osiągnięta.")
+            }
+
+        }
+        else if (text == "plus") {
+            if (Font < 3) {
+                Font += 0.5
+            }
+            else {
+                alert("Maksymalna wielkość czcionki osiągnięta.")
+            }
+        }
+        line_size = (23 * Font);
+
+        Edytor.style.fontSize = Font + "em"
+        CLC.style.fontSize = Font + "em"
+        area.style.lineHeight = line_size + "px"
+        Editor_refresh()
+    }
+
+    const Font_save = () => {
+        let obj = {
+            message: "Save",
+            font: Font,
+            color: Color
+        }
+
+        fetch("/FoCo", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(obj)
+        })
+    }
+
+    const Font_retrive = () => {
+
+        let obj = {
+            message: "Retrive"
+        }
+
+        fetch("/FoCo", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(obj)
+        })
+            .then(res => res.json())
+            .then(res => {
+                console.log("TEST")
+                Font = res.Font
+                Color = res.Color
+                line_size = (23 * Font)
+
+
+                Edytor.style.fontSize = Font + "em"
+                CLC.style.fontSize = Font + "em"
+                area.style.lineHeight = line_size + "px"
+                Color_Check(Color)
+                Editor_refresh()
+            })
+
+    }
+
+    const Editor_refresh = () => {
+        removeAllChildNodes(Lines)
+        let TAheight = area.value.split("\n")
+        console.log(TAheight)
+        area.setAttribute('rows', TAheight.length)
+        Lines.style.height = area.getAttribute("rows") * line_size + "px"
+        Divide.style.height = area.getAttribute("rows") * line_size + "px"
+        area.style.height = area.getAttribute("rows") * line_size + "px"
+        Edytor.style.height = area.getAttribute("rows") * line_size + "px"
+
+        let ctr = 0;
+        TAheight.forEach(element => {
+            ctr++
+            let NUM = document.createElement("div")
+            NUM.setAttribute('class', 'CNT')
+            NUM.innerText = ctr
+            NUM.style.height = line_size + "px"
+            Lines.append(NUM)
+
+        });
+    }
+
+    window.onload = function () {
+        Font_retrive()
+    }
+
+    area.onkeydown = function () {
+        Editor_refresh()
+    }
+
+    area.onkeyup = function () {
+        Editor_refresh()
+    }
+
+    area.onfocus = function () {
+        Editor_refresh()
+    }
+
+
+
+    function Fetch() {
+        let data = area.value
+        let file = (document.getElementById("NM").innerText).substring(1)
+        let obj = {
+            Text: data,
+            File: file,
+        }
+
+        fetch("/Save", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(obj)
+        })
+
+    }
+
+    function Show() {
+
+    }
+
+
+
+
+
+    function openDialogREN() {
+        const dialog = document.createElement('dialog');
+        dialog.classList.add('dialog');
+        dialog.innerHTML = `
+            <form method="GET" action="/RenameF">
+                <p>Zmień nazwę Pliku</p>
+                <input type="text" id="Rename" name="Rename">
+                <div>
+                    <button type="submit">OK</button>
+                    <button type="button" onclick="closeDialog()">Cancel</button>
+                </div>  
+            </form>
+        `;
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+
+    function closeDialog() {
+        const dialog = document.querySelector('dialog');
+        dialog.close();
+        dialog.remove();
+    }
+
+
+
+
+</script>

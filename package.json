@@ -1,0 +1,21 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server01.js",
+  "scripts": {
+    "start": "node server01.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2",
+    "express-handlebars": "^5.3.5",
+    "formidable": "^1.2.6",
+    "handlebars": "^4.7.8",
+    "nedb": "^1.8.0",
+    "nocache": "^4.0.0"
+  }
+}

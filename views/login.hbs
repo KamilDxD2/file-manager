@@ -1,0 +1,19 @@
+<div class="Auth">
+    <form action="/LOG_USER" method="post">
+        <div id="Login">
+            <div>
+                <h1>login</h1>
+            </div>
+            <div>
+                <input type="text" placeholder="Enter name" name="usr" required>
+                <input type="password" placeholder="Enter Pass" name="psw" required>
+                <button type="submit">Login</button>
+                <a href="/register">Register</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    let nav = document.querySelector("nav")
+    nav.style.display = "none"
+</script>

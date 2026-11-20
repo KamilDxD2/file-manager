@@ -1,0 +1,137 @@
+<div class="M2">
+    <div id="Left2">
+        <button id="Filters" onclick="PAN()">Filters</button>
+    </div>
+    <div id="Panel">
+        <div>Filters</div>
+        <div id="FIL">
+            {{#each effects}}
+            <div id="SINGLE_FIL">
+                <p>{{name}}</p>
+                <img class="IMG" style="filter:{{name}}(100%)" src="{{LST ../path}}"></img>
+            </div>
+            {{/each}}
+            <div id="SINGLE_FIL">
+                <p>none</p>
+                <img class="IMG" src="{{LST path}}"></img>
+            </div>
+        </div>
+
+    </div>
+    <div id="Space2">
+        <div class="PATH">
+            <p id="NM">/{{name}}</p>
+        </div>
+        <div id="Picture">
+            <img id="Image" src="{{LST path}}" data-path="{{path}}"></img>
+            <canvas id="canvas"></canvas>
+            <div id="bt_ribbon">
+                <button class="BTN" onclick="openDialogREN()">zmiana nazwy pliku</button>
+                <button class="BTN" onclick="SaveImg()">zapisz zmiany</button>
+                <a class="BTN" href="/Show">Podgląd pliku</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+
+
+    let Panel = document.getElementById("Panel")
+    let Space = document.getElementById("Space2")
+    let Flag = 0
+
+    const canvas = document.getElementById('canvas')
+    const context = canvas.getContext('2d')
+    const mainImage = document.getElementById("Image")
+
+    let image = new Image()
+    image.src = mainImage.src
+
+
+    image.onload = function () {
+        canvas.width = mainImage.width
+        canvas.height = mainImage.height
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+    console.log(document.querySelectorAll(".IMG"))
+    document.querySelectorAll(".IMG").forEach((element) => {
+        element.addEventListener("click", () => {
+            let filter = element.style.filter
+            if (filter) {
+                context.filter = filter
+            }
+            else {
+                context.filter = "none"
+            }
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        })
+    })
+
+
+    const PAN = () => {
+        if (Flag == 0) {
+            Panel.style.width = "10%"
+            Flag = 1
+            setTimeout(() => {
+                Panel.style.zIndex = "1"
+            }, 1000)
+        }
+        else {
+            Panel.style.zIndex = "-1"
+            Panel.style.width = "0%"
+            Flag = 0
+        }
+
+    }
+
+
+    function openDialogREN() {
+        const dialog = document.createElement('dialog');
+        dialog.classList.add('dialog');
+        dialog.innerHTML = `
+            <form method="GET" action="/RenameI">
+                <p>Zmień nazwę Pliku</p>
+                <input type="text" id="Rename" name="Rename">
+                <div>
+                    <button type="submit">OK</button>
+                    <button type="button" onclick="closeDialog()">Cancel</button>
+                </div>  
+            </form>
+        `;
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+
+    function closeDialog() {
+        const dialog = document.querySelector('dialog');
+        dialog.close();
+        dialog.remove();
+    }
+
+    function SaveImg() {
+        let dataURL = canvas.toDataURL("image/jpeg")
+        let obj = {
+            dataUrl: dataURL,
+            path: mainImage.dataset.path
+        }
+
+        fetch("/SaveImg", {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(obj),
+        })
+            .then(response => response.json())
+            .then(
+                data => {
+                    console.log("plik zapisany")
+                }
+            )
+    }
+
+
+
+</script>

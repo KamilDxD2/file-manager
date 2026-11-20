@@ -1,0 +1,136 @@
+<div class="M2">
+    <div class="Left">
+        <button onclick="openDialogFO()">nowy folder</button>
+        <button onclick="openDialogF()">nowy plik textowy</button>
+        <form enctype="multipart/form-data" method="POST" action="/UPL">
+            <label for="fileInput" class="custom-file-upload">
+                <input type="file" id="fileInput" name="fobj" multiple required accept="image/*" style="display: none;"
+                    onchange="displaySelectedFiles(this)">
+                <button>Select Files</button>
+                <p id="selectedFiles"></p>
+            </label>
+            <button disabled="true" id="UploadButton" type="submit">Upload</button>
+        </form>
+        {{#if isMainFolder}}
+        <button disabled="true" id="RenameButton" onclick="openDialogREN()">Zmiana nazwy folderu</button>
+        {{else}}
+        <button id="RenameButton" onclick="openDialogREN()">Zmiana nazwy folderu</button>
+        {{/if}}
+        <a id="logout" href="/LOG_OUT">Log Out</a>
+        <p>User: {{data.user}}</p>
+    </div>
+    <div class="Space">
+        <div class="PATH">
+            <a href="/FileManager2/PLIKI">home</a>
+            <p>></p>
+            {{#each data.PATH}}
+            <a href="/FileManager2/PLIKI/{{this}}">{{PTH this}}</a>
+            <p>></p>
+            {{/each}}
+        </div>
+        <div class="Folders">
+            {{#each data.folders}}
+            <div class="Folder">
+                <img src="/gfx/folder.png">
+                <a class="Fname" href="/FileManager2/{{path}}">{{ file }}</a>
+                <a class="X" href="/FREM/{{file}}">X</a>
+            </div>
+            {{/each}}
+        </div>
+        <div class="Files">
+            {{#each data.files}}
+            <div class="File">
+                <img src="/gfx_2/{{EXT this}}.png">
+                {{#if (IMG (EXT this))}}
+                <p><a href="/Image/{{this}}">{{ this }}</a></p>
+                {{else}}
+                <p><a href="/Edytor/{{this}}">{{ this }}</a></p>
+                {{/if}}
+                <a class="X" href="/FIREM/{{this}}">X</a>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+<script>
+    function openDialogREN() {
+        const dialog = document.createElement('dialog');
+        dialog.classList.add('dialog');
+        dialog.innerHTML = `
+            <form method="GET" action="/Rename">
+                <p>Zmień nazwę Folderu</p>
+                <input type="text" id="Rename" name="Rename">
+                <div>
+                    <button type="submit">OK</button>
+                    <button type="button" onclick="closeDialog()">Cancel</button>
+                </div>  
+            </form>
+        `;
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+    function openDialogFO() {
+        const dialog = document.createElement('dialog');
+        dialog.classList.add('dialog');
+        dialog.innerHTML = `
+            <form method="GET" action="/AddFolder">
+                <p>Nazwa nowego folderu</p>
+                <input type="text" id="folderName" name="folderName">
+                <div>
+                    <button type="submit">OK</button>
+                    <button type="button" onclick="closeDialog()">Cancel</button>
+                </div>  
+            </form>
+        `;
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+    function openDialogF() {
+        const dialog = document.createElement('dialog');
+        dialog.classList.add('dialog');
+        dialog.innerHTML = `
+            <form method="GET" action="/AddFile">
+                <p>Nazwa nowego pliku txt</p>
+                <input type="text" id="fileName" name="fileName">
+                <div>
+                    <button type="submit">OK</button>
+                    <button type="button" onclick="closeDialog()">Cancel</button>
+                </div>  
+            </form>
+        `;
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+
+    //function preventDot(event) {
+    //    if (event.keyCode === 190 || event.keyCode === 110) {
+    //       event.preventDefault();
+    //    }
+    //}
+
+    function closeDialog() {
+        const dialog = document.querySelector('dialog');
+        dialog.close();
+        dialog.remove();
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    const customFileUpload = document.querySelector('.custom-file-upload');
+    customFileUpload.addEventListener('click', function () {
+        fileInput.click();
+    });
+
+
+    function displaySelectedFiles(input) {
+        const selectedFiles = document.getElementById('selectedFiles');
+        if (input.files && input.files.length > 0) {
+            const fileCount = input.files.length;
+            const fileText = fileCount === 1 ? 'file' : 'files';
+            selectedFiles.textContent = `Selected ${fileCount} ${fileText} to upload`;
+            document.getElementById("UploadButton").disabled = false;
+        } else {
+            selectedFiles.textContent = '';
+            document.getElementById("UploadButton").disabled = true;
+        }
+    }
+</script>
